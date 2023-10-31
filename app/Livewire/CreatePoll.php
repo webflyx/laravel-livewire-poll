@@ -4,11 +4,30 @@ namespace App\Livewire;
 
 use App\Models\Poll;
 use Livewire\Component;
+use Livewire\Attributes\Rule;
 
 class CreatePoll extends Component
 {
+
+    #[Rule('required|string|min:5|max:255')] //This method Rule for live validation
     public string $title;
+
     public array $options = ['First Option'];
+
+    public function rules(): array
+    {
+        return [
+            'options' => 'required|array|min:1|max:10',
+            'options.*' => 'required|string|min:5|max:255',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'options.*.required' => 'Option field can\'t be empty',
+        ];
+    }
 
     public function render()
     {
@@ -28,6 +47,8 @@ class CreatePoll extends Component
 
     public function createPoll()
     {
+        $this->validate();
+
         $poll = Poll::create([
             'title' => $this->title,
         ]);
@@ -39,6 +60,7 @@ class CreatePoll extends Component
         }
 
         $this->reset('title', 'options');
+
+        $this->dispatch('pollCreated'); 
     }
 }
-
